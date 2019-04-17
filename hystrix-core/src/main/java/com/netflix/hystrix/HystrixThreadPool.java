@@ -109,7 +109,7 @@ public interface HystrixThreadPool {
         /* package */static HystrixThreadPool getInstance(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties.Setter propertiesBuilder) {
             // get the key to use instead of using the object itself so that if people forget to implement equals/hashcode things will still work
             String key = threadPoolKey.name();
-
+            Logger logger = LoggerFactory.getLogger(HystrixThreadPool.class);
             HystrixThreadPoolProperties.Setter oldPropertiesBuilder = threadPoolProperties.get(key);
             boolean updated = oldPropertiesBuilder != null && !oldPropertiesBuilder.equals(propertiesBuilder);
             // this should find it for all but the first time
@@ -126,7 +126,9 @@ public interface HystrixThreadPool {
                         threadPoolProperties.put(key, propertiesBuilder);
                     }
                     if(previouslyCached != null){
+                        logger.warn("Shutting down the pool for : " + key + ", pool : " + previouslyCached.getExecutor());
                         previouslyCached.getExecutor().shutdown();
+                        logger.warn("Shutdown done : " + previouslyCached.getExecutor().isShutdown());
                     }
                 }
             }
