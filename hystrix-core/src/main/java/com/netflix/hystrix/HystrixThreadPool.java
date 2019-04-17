@@ -82,6 +82,8 @@ public interface HystrixThreadPool {
      */
     public boolean isQueueSpaceAvailable();
 
+    Logger logger = LoggerFactory.getLogger(HystrixThreadPool.class);
+
     /**
      * @ExcludeFromJavadoc
      */
@@ -109,7 +111,6 @@ public interface HystrixThreadPool {
         /* package */static HystrixThreadPool getInstance(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties.Setter propertiesBuilder) {
             // get the key to use instead of using the object itself so that if people forget to implement equals/hashcode things will still work
             String key = threadPoolKey.name();
-            Logger logger = LoggerFactory.getLogger(HystrixThreadPool.class);
             HystrixThreadPoolProperties.Setter oldPropertiesBuilder = threadPoolProperties.get(key);
             boolean updated = oldPropertiesBuilder != null && !oldPropertiesBuilder.equals(propertiesBuilder);
             // this should find it for all but the first time
@@ -122,13 +123,14 @@ public interface HystrixThreadPool {
             synchronized (HystrixThreadPool.class) {
                 if (!threadPools.containsKey(key) || updated) {
                     threadPools.put(key, new HystrixThreadPoolDefault(threadPoolKey, propertiesBuilder, updated));
+                    logger.error("Creating new pool for : " + key);
                     if(propertiesBuilder != null){
                         threadPoolProperties.put(key, propertiesBuilder);
                     }
                     if(previouslyCached != null){
-                        logger.warn("Shutting down the pool for : " + key + ", pool : " + previouslyCached.getExecutor());
+                        logger.error("Shutting down the pool for : " + key + ", pool : " + previouslyCached.getExecutor());
                         previouslyCached.getExecutor().shutdown();
-                        logger.warn("Shutdown done : " + previouslyCached.getExecutor().isShutdown());
+                        logger.error("Shutdown done : " + previouslyCached.getExecutor().isShutdown());
                     }
                 }
             }
