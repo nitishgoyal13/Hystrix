@@ -26,6 +26,9 @@ import com.yammer.metrics.core.MetricsRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Implementation of {@link HystrixMetricsPublisherThreadPool} using Yammer Metrics (https://github.com/codahale/metrics)
  */
@@ -36,6 +39,7 @@ public class HystrixYammerMetricsPublisherThreadPool implements HystrixMetricsPu
     private final MetricsRegistry metricsRegistry;
     private final String metricGroup;
     private final String metricType;
+    private List<MetricName> metricsList = new ArrayList<>();
 
     static final Logger logger = LoggerFactory.getLogger(HystrixYammerMetricsPublisherThreadPool.class);
 
